@@ -14,25 +14,25 @@ jobs:
 
       - name: Extract Label Information
         run: |
-          # Extract label information from the event payload
+          
           labels=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
 
-          # Extract issueID and points from labels
+          
           issueID=$(echo "$labels" | sed -nE 's/issueID:([0-9]+)/\1/p')
           points=$(echo "$labels" | sed -nE 's/points:([0-9]+)/\1/p')
           prNumber=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
 
-          # Output the extracted information for debugging
+          
           echo "Issue ID: $issueID"
           echo "Points: $points"
           echo "PR Number: $prNumber"
 
       - name: Update Points
         run: |
-          # Make a POST request to your API endpoint using extracted information
+          
           API_DOMAIN=${{ secrets.API_DOMAIN }}
           curl -X POST -H "Content-Type: application/json" \
                -d "{\"issueID\": $issueID, \"points\": $points, \"prNumber\": $prNumber}" \
                $API_DOMAIN/points
         
-        # Add more steps as needed
+        
