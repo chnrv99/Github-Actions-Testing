@@ -33,7 +33,7 @@ jobs:
           # Make a POST request to your API endpoint using extracted information
           API_DOMAIN=${{ secrets.API_DOMAIN }}
           curl -X POST -H "Content-Type: application/json" \
-               -d "{\"issueID\": $issueID, \"points\": $points, \"issueNumber\": $issueNumber}" \
+               -d "{\"issueID\": $issueID, \"points\": $points" \
                $API_DOMAIN/points
 
         # Add more steps as needed
