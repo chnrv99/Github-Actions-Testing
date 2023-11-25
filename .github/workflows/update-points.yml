@@ -13,27 +13,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Extract Label Information
-        run: |
-          # Extract label information from the event payload
-          labels=$(jq -r '.issue.labels[].name' "$GITHUB_EVENT_PATH")
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
 
-          # Extract issueID and points from labels
+      - name: Run Update Points Script
+        run: |
+          npm install # Install dependencies if needed
+          node scrpits/updatePoints.js
+        env:
+          INPUT_ISSUE_ID: ${{ steps.extract.outputs.issueID }}
+          INPUT_POINTS: ${{ steps.extract.outputs.points }}
+          INPUT_USERNAME: ${{ steps.extract.outputs.username }}
+
+      - name: Extract Label Information
+        id: extract
+        run: |
+          labels=$(jq -r '.issue.labels[].name' "$GITHUB_EVENT_PATH")
           issueID=$(echo "$labels" | sed -nE 's/issueID:([0-9]+)/\1/p')
           points=$(echo "$labels" | sed -nE 's/points:([0-9]+)/\1/p')
           username=$(jq -r '.issue.assignee.login' "$GITHUB_EVENT_PATH")
+          echo "::set-output name=issueID::$issueID"
+          echo "::set-output name=points::$points"
+          echo "::set-output name=username::$username"
 
-          # Output the extracted information for debugging
-          echo "Issue ID: $issueID"
-          echo "Points: $points"
-          echo "Username: $username"
-
-      - name: Update Points
-        run: |
-          # Make a POST request to your API endpoint using extracted information
-          API_DOMAIN=${{ secrets.API_DOMAIN }}
-          curl -X POST -H "Content-Type: application/json" \
-            -d "{\"issueID\": $(echo "$issueID" | jq -R . || echo null), \"points\": $(echo "$points" | jq -R . || echo null), \"username\": \"$username\"}" \
-            $API_DOMAIN/points
-
-        # Add more steps as needed
+      # Add more steps as needed
