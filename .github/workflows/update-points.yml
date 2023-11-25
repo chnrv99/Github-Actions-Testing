@@ -21,19 +21,19 @@ jobs:
           # Extract issueID and points from labels
           issueID=$(echo "$labels" | sed -nE 's/issueID:([0-9]+)/\1/p')
           points=$(echo "$labels" | sed -nE 's/points:([0-9]+)/\1/p')
-          issueNumber=$(jq -r '.issue.number' "$GITHUB_EVENT_PATH")
+          username=$(jq -r '.issue.assignee.login' "$GITHUB_EVENT_PATH")
 
           # Output the extracted information for debugging
           echo "Issue ID: $issueID"
           echo "Points: $points"
-          echo "Issue Number: $issueNumber"
+          echo "Username: $username"
 
       - name: Update Points
         run: |
           # Make a POST request to your API endpoint using extracted information
           API_DOMAIN=${{ secrets.API_DOMAIN }}
           curl -X POST -H "Content-Type: application/json" \
-               -d "{\"issueID\": $issueID, \"points\": $points" \
+               -d "{\"issueID\": $issueID, \"points\": $points, \"username\": \"$username\"}" \
                $API_DOMAIN/points
 
         # Add more steps as needed
